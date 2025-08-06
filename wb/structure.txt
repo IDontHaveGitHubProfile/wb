@@ -1,0 +1,42 @@
+wb/
+├── alembic
+│   ├── README
+│   ├── __pycache__
+│   │   └── env.cpython-310.pyc
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+│       ├── 1d4252794cf4_create_products_table.py
+│       ├── 4baa81bdc450_add_link_field.py
+│       └── __pycache__
+│           ├── 1d4252794cf4_create_products_table.cpython-310.pyc
+│           └── 4baa81bdc450_add_link_field.cpython-310.pyc
+├── alembic.ini
+├── app
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-310.pyc
+│   │   ├── crud.cpython-310.pyc
+│   │   ├── database.cpython-310.pyc
+│   │   ├── main.cpython-310.pyc
+│   │   ├── models.cpython-310.pyc
+│   │   ├── parser.cpython-310.pyc
+│   │   └── schemas.cpython-310.pyc
+│   ├── crud.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
+│   ├── parser.py
+│   └── schemas.py
+├── parser
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-310.pyc
+│   │   └── wb_selenium.cpython-310.pyc
+│   ├── test_parser.py
+│   └── wb_selenium.py
+├── products.db
+├── products.json
+├── requirements.txt
+├── structure.py
+└── structure.txt

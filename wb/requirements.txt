@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-sqlalchemy
-psycopg2
-alembic
-pydantic
-selenium==4.0.0
-webdriver-manager==3.5.3
-beautifulsoup4==4.10.0

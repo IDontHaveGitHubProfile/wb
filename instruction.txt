@@ -1,0 +1,113 @@
+Парсер собирает товары по поисковому запросу "термопаста" и сохраняет их в БД.
+Данные на карточку: название, цена, рейтинг, кол-во отзывов, остатки.
+Для корректных цен/остатков используем ваши браузерные cookies (и регион из X-Info).
+Желательно войти в свой профиль для работоспособности системы (потому что я не помню надо ли входить или нет)
+
+Query запрос в pgAdmin
+
+DROP TABLE IF EXISTS products;
+
+CREATE TABLE products (
+  id            BIGSERIAL PRIMARY KEY,
+  nm_id         BIGINT UNIQUE NOT NULL,
+  name          TEXT NOT NULL,
+  price         INTEGER NOT NULL,
+  rating        REAL NOT NULL DEFAULT 0.0,
+  review_count  INTEGER NOT NULL DEFAULT 0,
+  stock         INTEGER NOT NULL DEFAULT 0
+);
+
+Удаление для очищения базы от излишних данных и/или повторного теста парсинга товаров
+
+Как получить рабочий cookies.json
+1 вариант (Windows PowerShell)
+
+1.1 Закройте все окна Chrome:
+
+taskkill /IM chrome.exe /F
+
+
+1.2 Запустите Chrome с DevTools-портом и новым профилем:
+
+$PORT = 9222
+$TMPPROFILE = "$env:TEMP\wb_debug_profile"
+New-Item -ItemType Directory -Force -Path $TMPPROFILE | Out-Null
+
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" `
+  --remote-debugging-port=$PORT `
+  --user-data-dir="$TMPPROFILE" `
+  --profile-directory="Default" `
+  --new-window "https://www.wildberries.ru/"
+
+
+1.3 Проверьте работоспособность порта из корневой папки проекта:
+
+netstat -ano | findstr $PORT
+
+Если ответ примерно такой:
+
+  TCP    127.0.0.1:9222         0.0.0.0:0              LISTENING       10968
+
+То всё работает
+
+
+1.4 Проверьте, что DevTools поднялся:
+
+Откройте http://127.0.0.1:9222/json/version — должен быть JSON.
+
+
+1.5 Оставьте вкладку WB открытой и выполните экспорт:
+
+python export_cookies_cdp.py
+
+Скрипт сохранит cookies.json и ua.txt рядом. Переместите их в корень проекта. Насчёт ua.txt, думаю, можно удалить
+
+
+2 вариант (Через расширение)
+
+2.1 В вашем обычном Chrome, на https://www.wildberries.ru экспортируйте куки расширением EditThisCookie в cookies_raw.json в корень проекта
+(все cookies будут скопированы в буфер обмена на кнопку экспорта, пятую сверху слева направо)
+
+
+2.2 Прогоните нормализатор:
+
+python normalize_cookies.py cookies_raw.json cookies.json
+
+Это приведёт формат к тому, который понимает парсер (name, value, domain, path, secure, httpOnly).
+
+
+2.3 Положите cookies.json в корень проекта.
+
+
+
+Что должно быть в cookies.json – примерный минимальный набор, который почти всегда достаточен:
+
+_wbauid
+wbx-validation-key
+x_wbaas_token
+_cp
+(опционально) external-locale
+
+
+
+В database.py, alembic.ini подставьте свои данные (user, пароль, база)
+
+
+Запуск API из корневой папки проекта
+
+python -m uvicorn app.main:app --reload или $env:WB_HTML_META="0"; uvicorn app.main:app --reload
+
+Перейти по ссылке Swagger: http://127.0.0.1:8000/docs
+
+
+Эндпоинты
+POST /parse — спарсить и сохранить:
+query — поисковый запрос (уже стоит "термопаста").
+
+
+GET /products — выдаёт товары:
+
+Считывает всё, но браузер/Swagger может подвисать, если там запроос на 5000+ записей.
+
+
+
